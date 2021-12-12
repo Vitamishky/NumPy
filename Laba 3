@@ -1,34 +1,31 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.animation as animation
 
-f = open(f"C:/Users/User/Desktop/start.txt", 'r')
-y = np.array([i.rstrip() for i in f.readlines()], dtype = np.float64)
-f.close()
-x = np.arange(y.size)
-b = np.zeros(y.size)
+n = 9
+for i in range(1, 4):
+    f = open(f"C:/Users/User/Desktop/signal0{i}.dat", 'r')
+    y = np.array([i.rstrip() for i in f.readlines()], dtype=np.float64)
+    x = np.arange(100)
+    f.close()
 
-A = np.eye(y.size)
-A[0][-1] = -1
-B = np.vstack((b, np.eye(y.size)))[:-1,:]
-A = A - B
+    ret = np.cumsum(y, dtype=np.float64)
+    ret[n:] = ret[n:] - ret[:-n]
+    ret[n:] = ret[n:] / n
+    for j in range(0, n):
+        ret[j] /= j + 1
+    y_sum = ret
 
-fig, ax = plt.subplots()
+    fig, (ax_1, ax_2) = plt.subplots(1, 2)
+    fig.set_figheight(9)
+    fig.set_figwidth(18)
 
-fig.set_figheight(7)
-fig.set_figwidth(14)
-plt.xlabel('X')
-plt.ylabel('Y')
-ax.grid(True)
+    ax_1.set_title('До фильтра')
+    ax_2.set_title('После фильтра')
 
-line, = ax.plot(x, y)
+    ax_1.plot(x, y)
+    ax_1.grid()
 
-def animate(i):
-    global y
-    y = y - ((0.5 * A) @ y)
-    line.set_ydata(y)
-    return line,
+    ax_2.plot(x, y_sum)
+    ax_2.grid()
 
-anime = animation.FuncAnimation(fig, animate, interval = 10, blit = False, frames = 255, repeat = False)
-
-anime.save("plot.gif", writer = 'pillow', fps = 60)
+    plt.savefig(f'improved{i}.png')
